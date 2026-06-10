@@ -176,6 +176,23 @@ public class Owner extends Person {
 	}
 
 	/**
+	 * Adds the given {@link Appointment} to the {@link Pet} with the given identifier.
+	 * @param petId the identifier of the {@link Pet}, must not be {@literal null}.
+	 * @param appointment the appointment to add, must not be {@literal null}.
+	 */
+	public void addAppointment(Integer petId, Appointment appointment) {
+
+		Assert.notNull(petId, "Pet identifier must not be null!");
+		Assert.notNull(appointment, "Appointment must not be null!");
+
+		Pet pet = getPet(petId);
+
+		Assert.notNull(pet, "Invalid Pet identifier!");
+
+		pet.addAppointment(appointment);
+	}
+
+	/**
 	 * Return all upcoming appointments for this owner's pets, ordered by date.
 	 * @return upcoming appointments across all pets, sorted by appointment date
 	 */
@@ -195,9 +212,13 @@ public class Owner extends Person {
 	 * @return the pet that owns the appointment, or {@code null} if not found
 	 */
 	public Pet getPet(Appointment appointment) {
-		for (Pet pet : getPets()) {
-			if (pet.getAppointments().contains(appointment)) {
-				return pet;
+		Pet pet = appointment.getPet();
+		if (pet != null && getPets().contains(pet)) {
+			return pet;
+		}
+		for (Pet ownerPet : getPets()) {
+			if (ownerPet.getAppointments().contains(appointment)) {
+				return ownerPet;
 			}
 		}
 		return null;

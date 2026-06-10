@@ -58,8 +58,7 @@ public class Pet extends NamedEntity {
 	@OrderBy("date ASC")
 	private final Set<Visit> visits = new LinkedHashSet<>();
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "pet_id")
+	@OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@OrderBy("date ASC")
 	private final Set<Appointment> appointments = new LinkedHashSet<>();
 
@@ -93,6 +92,7 @@ public class Pet extends NamedEntity {
 
 	public void addAppointment(Appointment appointment) {
 		getAppointments().add(appointment);
+		appointment.setPet(this);
 	}
 
 }

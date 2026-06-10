@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'owners')}">
+
+<body>
+
+  <h2>
+    <th:block th:if="${appointment['new']}" th:text="#{new}">New </th:block>
+    <span th:text="#{appointment}">Appointment</span>
+  </h2>
+
+  <b th:text="#{pet}">Pet</b>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th th:text="#{name}">Name</th>
+        <th th:text="#{birthDate}">Birth Date</th>
+        <th th:text="#{type}">Type</th>
+        <th th:text="#{owner}">Owner</th>
+      </tr>
+    </thead>
+    <tr>
+      <td th:text="${pet.name}"></td>
+      <td th:text="${#temporals.format(pet.birthDate, 'yyyy-MM-dd')}"></td>
+      <td th:text="${pet.type}"></td>
+      <td th:text="${owner?.firstName + ' ' + owner?.lastName}"></td>
+    </tr>
+  </table>
+
+  <form th:object="${appointment}" class="form-horizontal" method="post">
+    <div class="form-group has-feedback">
+      <input th:replace="~{fragments/inputField :: input ('Date', 'date', 'date')}" />
+      <input th:replace="~{fragments/inputField :: input ('Description', 'description', 'text')}" />
+      <div class="form-group">
+        <label class="col-sm-2 control-label" for="vetId" th:text="#{veterinarian}">Veterinarian</label>
+        <div class="col-sm-10">
+          <select class="form-control" id="vetId" name="vetId" required>
+            <option value="" th:text="#{selectVeterinarian}">Select a veterinarian</option>
+            <option th:each="vet : ${vets}" th:value="${vet.id}"
+              th:text="${vet.firstName + ' ' + vet.lastName}">James Carter</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-primary" type="submit" th:text="#{addAppointment}">Add Appointment</button>
+      </div>
+    </div>
+  </form>
+
+  <br />
+  <b th:text="#{otherAppointments}">Other Appointments</b>
+  <table class="table table-striped">
+    <tr>
+      <th th:text="#{appointmentDate}">Appointment Date</th>
+      <th th:text="#{veterinarian}">Veterinarian</th>
+      <th th:text="#{description}">Description</th>
+    </tr>
+    <tr th:each="otherAppointment : ${pet.appointments.?[id != null]}">
+      <td th:text="${#temporals.format(otherAppointment.date, 'yyyy-MM-dd')}"></td>
+      <td th:if="${otherAppointment.vet != null}"
+        th:text="${otherAppointment.vet.firstName + ' ' + otherAppointment.vet.lastName}"></td>
+      <td th:unless="${otherAppointment.vet != null}" th:text="#{none}">none</td>
+      <td th:text="${otherAppointment.description}"></td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(pet.appointments.?[id != null])}">
+      <td colspan="3" class="text-muted" th:text="#{noAppointmentsYet}">No appointments yet</td>
+    </tr>
+  </table>
+
+  <script th:inline="javascript">
+    const ownerId = /*[[${owner.id}]]*/ 0;
+    const petId = /*[[${pet.id}]]*/ 0;
+    const selectVeterinarianLabel = /*[[#{selectVeterinarian}]]*/ 'Select a veterinarian';
+    const noVetsAvailableLabel = /*[[#{noVetsAvailable}]]*/ 'No veterinarians available';
+
+    function updateVetOptions(vets) {
+      const vetSelect = document.getElementById('vetId');
+      const selectedVetId = vetSelect.value;
+      vetSelect.innerHTML = '';
+
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = selectVeterinarianLabel;
+      vetSelect.appendChild(placeholder);
+
+      if (vets.length === 0) {
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = noVetsAvailableLabel;
+        emptyOption.disabled = true;
+        vetSelect.appendChild(emptyOption);
+        return;
+      }
+
+      vets.forEach(function (vet) {
+        const option = document.createElement('option');
+        option.value = vet.id;
+        option.textContent = vet.firstName + ' ' + vet.lastName;
+        if (String(vet.id) === selectedVetId) {
+          option.selected = true;
+        }
+        vetSelect.appendChild(option);
+      });
+    }
+
+    function refreshAvailableVets() {
+      const dateInput = document.getElementById('date');
+      const date = dateInput.value;
+      if (!date) {
+        return;
+      }
+
+      fetch('/owners/' + ownerId + '/pets/' + petId + '/appointments/available-vets?date=' + date)
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error('Failed to load available veterinarians');
+          }
+          return response.json();
+        })
+        .then(updateVetOptions)
+        .catch(function () {
+          updateVetOptions([]);
+        });
+    }
+
+    document.getElementById('date').addEventListener('change', refreshAvailableVets);
+  </script>
+
+</body>
+
+</html>

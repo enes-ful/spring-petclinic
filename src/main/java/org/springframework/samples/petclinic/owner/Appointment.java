@@ -39,6 +39,10 @@ public class Appointment extends BaseEntity {
 	@NotBlank
 	private String description;
 
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "pet_id")
+	private Pet pet;
+
 	@ManyToOne
 	@JoinColumn(name = "vet_id")
 	private Vet vet;
@@ -61,6 +65,14 @@ public class Appointment extends BaseEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Pet getPet() {
+		return this.pet;
+	}
+
+	public void setPet(Pet pet) {
+		this.pet = pet;
 	}
 
 	public Vet getVet() {
