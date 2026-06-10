@@ -51,3 +51,6 @@ INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2010-03-04', 'ra
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2011-03-04', 'rabies shot' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=2);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2009-06-04', 'neutered' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=3);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2008-09-04', 'spayed' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=4);
+
+INSERT INTO appointments (pet_id, vet_id, appointment_date, description) SELECT 1, 1, '2026-06-15', 'Annual checkup' WHERE NOT EXISTS (SELECT * FROM appointments WHERE id=1);
+INSERT INTO appointments (pet_id, vet_id, appointment_date, description) SELECT 3, 2, '2026-07-01', 'Vaccination' WHERE NOT EXISTS (SELECT * FROM appointments WHERE id=2);
