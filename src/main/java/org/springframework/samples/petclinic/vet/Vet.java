@@ -15,20 +15,24 @@
  */
 package org.springframework.samples.petclinic.vet;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.samples.petclinic.model.NamedEntity;
 import org.springframework.samples.petclinic.model.Person;
+import org.springframework.samples.petclinic.owner.Appointment;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.xml.bind.annotation.XmlElement;
 
@@ -43,6 +47,11 @@ import jakarta.xml.bind.annotation.XmlElement;
 @Entity
 @Table(name = "vets")
 public class Vet extends Person {
+
+	public static final int DAILY_APPOINTMENT_LIMIT = 8;
+
+	@OneToMany(mappedBy = "vet", fetch = FetchType.LAZY)
+	private Set<Appointment> appointments;
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
@@ -69,6 +78,32 @@ public class Vet extends Person {
 
 	public void addSpecialty(Specialty specialty) {
 		getSpecialtiesInternal().add(specialty);
+	}
+
+	protected Set<Appointment> getAppointmentsInternal() {
+		if (this.appointments == null) {
+			this.appointments = new HashSet<>();
+		}
+		return this.appointments;
+	}
+
+	public int getNrOfAppointments() {
+		return getAppointmentsInternal().size();
+	}
+
+	public int getDailyAppointmentCount(LocalDate date) {
+		return (int) getAppointmentsInternal().stream()
+			.filter(appointment -> Objects.equals(appointment.getDate(), date))
+			.count();
+	}
+
+	public boolean isAvailable(LocalDate date) {
+		return getDailyAppointmentCount(date) < DAILY_APPOINTMENT_LIMIT;
+	}
+
+	public void addAppointment(Appointment appointment) {
+		getAppointmentsInternal().add(appointment);
+		appointment.setVet(this);
 	}
 
 }
