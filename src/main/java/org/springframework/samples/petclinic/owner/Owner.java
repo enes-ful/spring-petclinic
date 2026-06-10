@@ -15,7 +15,9 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -171,6 +173,34 @@ public class Owner extends Person {
 		Assert.notNull(pet, "Invalid Pet identifier!");
 
 		pet.addVisit(visit);
+	}
+
+	/**
+	 * Return all upcoming appointments for this owner's pets, ordered by date.
+	 * @return upcoming appointments across all pets, sorted by appointment date
+	 */
+	public List<Appointment> getUpcomingAppointments() {
+		LocalDate today = LocalDate.now();
+		return getPets().stream()
+			.flatMap(pet -> pet.getAppointments().stream())
+			.filter(appointment -> appointment.getDate() != null && !appointment.getDate().isBefore(today))
+			.sorted(Comparator.comparing(Appointment::getDate))
+			.toList();
+	}
+
+	/**
+	 * Return the {@link Pet} that owns the given {@link Appointment}, or {@code null} if
+	 * none found for this owner.
+	 * @param appointment the appointment to look up
+	 * @return the pet that owns the appointment, or {@code null} if not found
+	 */
+	public Pet getPet(Appointment appointment) {
+		for (Pet pet : getPets()) {
+			if (pet.getAppointments().contains(appointment)) {
+				return pet;
+			}
+		}
+		return null;
 	}
 
 }
