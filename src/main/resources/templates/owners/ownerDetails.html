@@ -41,6 +41,35 @@
   <br />
   <br />
   <br />
+  <h2 th:text="#{upcomingAppointments}">Upcoming Appointments</h2>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th th:text="#{pet}">Pet</th>
+        <th th:text="#{appointmentDate}">Appointment Date</th>
+        <th th:text="#{veterinarian}">Veterinarian</th>
+        <th th:text="#{description}">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="appointment : ${owner.upcomingAppointments}"
+        th:with="pet=${owner.getPet(appointment)}">
+        <td th:text="${pet != null ? pet.name : ''}"></td>
+        <td th:text="${#temporals.format(appointment.date, 'yyyy-MM-dd')}"></td>
+        <td th:if="${appointment.vet != null}"
+          th:text="${appointment.vet.firstName + ' ' + appointment.vet.lastName}"></td>
+        <td th:unless="${appointment.vet != null}" th:text="#{none}">none</td>
+        <td th:text="${appointment.description}"></td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(owner.upcomingAppointments)}">
+        <td colspan="4" class="text-muted" th:text="#{noUpcomingAppointments}">No upcoming appointments</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br />
+  <br />
   <h2 th:text="#{petsAndVisits}">Pets and Visits</h2>
 
   <table class="table table-striped">
