@@ -41,6 +41,7 @@ class PetAppointmentTests {
 
 		assertThat(pet.getAppointments()).hasSize(1);
 		assertThat(pet.getAppointments()).contains(appointment);
+		assertThat(appointment.getPet()).isEqualTo(pet);
 	}
 
 	@Test

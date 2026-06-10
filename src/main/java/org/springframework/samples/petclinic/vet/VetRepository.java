@@ -15,14 +15,16 @@
  */
 package org.springframework.samples.petclinic.vet;
 
+import java.util.Collection;
+import java.util.Optional;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
 
 /**
  * Repository class for <code>Vet</code> domain objects All method names are compliant
@@ -43,7 +45,17 @@ public interface VetRepository extends Repository<Vet, Integer> {
 	 */
 	@Transactional(readOnly = true)
 	@Cacheable("vets")
+	@EntityGraph(attributePaths = { "appointments" })
 	Collection<Vet> findAll() throws DataAccessException;
+
+	/**
+	 * Retrieve a <code>Vet</code> from the data store by id.
+	 * @param id the id to search for
+	 * @return the <code>Vet</code> if found
+	 */
+	@Transactional(readOnly = true)
+	@EntityGraph(attributePaths = { "appointments" })
+	Optional<Vet> findById(Integer id) throws DataAccessException;
 
 	/**
 	 * Retrieve all <code>Vet</code>s from data store in Pages
