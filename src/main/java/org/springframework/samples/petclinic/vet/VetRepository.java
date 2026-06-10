@@ -45,7 +45,7 @@ public interface VetRepository extends Repository<Vet, Integer> {
 	 */
 	@Transactional(readOnly = true)
 	@Cacheable("vets")
-	@EntityGraph(attributePaths = { "appointments" })
+	@EntityGraph(attributePaths = { "appointments", "specialties" })
 	Collection<Vet> findAll() throws DataAccessException;
 
 	/**
@@ -54,7 +54,7 @@ public interface VetRepository extends Repository<Vet, Integer> {
 	 * @return the <code>Vet</code> if found
 	 */
 	@Transactional(readOnly = true)
-	@EntityGraph(attributePaths = { "appointments" })
+	@EntityGraph(attributePaths = { "appointments", "specialties" })
 	Optional<Vet> findById(Integer id) throws DataAccessException;
 
 	/**
@@ -65,6 +65,7 @@ public interface VetRepository extends Repository<Vet, Integer> {
 	 */
 	@Transactional(readOnly = true)
 	@Cacheable("vets")
+	@EntityGraph(attributePaths = { "appointments", "specialties" })
 	Page<Vet> findAll(Pageable pageable) throws DataAccessException;
 
 }

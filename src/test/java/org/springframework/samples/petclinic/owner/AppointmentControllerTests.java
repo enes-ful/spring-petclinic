@@ -37,6 +37,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.vet.VetCaches;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -60,6 +61,9 @@ class AppointmentControllerTests {
 
 	@MockitoBean
 	private VetRepository vets;
+
+	@MockitoBean
+	private VetCaches vetCaches;
 
 	@BeforeEach
 	void setup() {
