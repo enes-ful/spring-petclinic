@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.vet.VetCaches;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.samples.petclinic.vet.VetSummary;
 import org.springframework.stereotype.Controller;
@@ -53,9 +54,12 @@ class AppointmentController {
 
 	private final VetRepository vets;
 
-	public AppointmentController(OwnerRepository owners, VetRepository vets) {
+	private final VetCaches vetCaches;
+
+	public AppointmentController(OwnerRepository owners, VetRepository vets, VetCaches vetCaches) {
 		this.owners = owners;
 		this.vets = vets;
+		this.vetCaches = vetCaches;
 	}
 
 	@InitBinder("appointment")
@@ -118,6 +122,7 @@ class AppointmentController {
 		appointment.setVet(vet);
 		owner.addAppointment(petId, appointment);
 		this.owners.save(owner);
+		this.vetCaches.evictAll();
 
 		redirectAttributes.addFlashAttribute("message", "Your appointment has been booked");
 		return "redirect:/owners/{ownerId}";

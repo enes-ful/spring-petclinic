@@ -16,6 +16,8 @@
 
 package org.springframework.samples.petclinic.vet;
 
+import java.time.LocalDate;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.samples.petclinic.owner.Appointment;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -85,8 +89,29 @@ class VetControllerTests {
 		mockMvc.perform(MockMvcRequestBuilders.get("/vets.html?page=1"))
 			.andExpect(status().isOk())
 			.andExpect(model().attributeExists("listVets"))
+			.andExpect(model().attributeExists("today"))
 			.andExpect(view().name("vets/vetList"));
 
+	}
+
+	@Test
+	void showVetListHtmlDisplaysAvailability() throws Exception {
+		Vet bookedJames = james();
+		LocalDate today = LocalDate.now();
+		for (int i = 0; i < Vet.DAILY_APPOINTMENT_LIMIT; i++) {
+			Appointment appointment = new Appointment();
+			appointment.setDate(today);
+			appointment.setDescription("Visit " + i);
+			bookedJames.addAppointment(appointment);
+		}
+
+		given(this.vets.findAll(any(Pageable.class)))
+			.willReturn(new PageImpl<>(Lists.newArrayList(bookedJames, helen())));
+
+		mockMvc.perform(MockMvcRequestBuilders.get("/vets.html?page=1"))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("Fully Booked")))
+			.andExpect(content().string(containsString("Available")));
 	}
 
 	@Test
